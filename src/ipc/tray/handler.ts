@@ -38,12 +38,31 @@ function getQuotaText(account: CloudAccount | null, texts: any): string[] {
 
 export function initTray(mainWindow: BrowserWindow) {
   globalMainWindow = mainWindow;
+
+  // PATCH 3: Destroy existing tray before creating new one (prevents zombie tray icons)
+  if (tray) {
+    try {
+      tray.destroy();
+    } catch (e) {
+      logger.error('Failed to destroy existing tray', e);
+    }
+    tray = null;
+    logger.info('Destroyed existing tray before creating new one');
+  }
+
   const inDevelopment = process.env.NODE_ENV === 'development';
   const iconPath = inDevelopment
     ? path.join(process.cwd(), 'src/assets/tray.png')
     : path.join(process.resourcesPath, 'assets/tray.png');
 
   const icon = nativeImage.createFromPath(iconPath);
+
+  // Verify icon is valid before creating tray
+  if (icon.isEmpty()) {
+    logger.error(`Tray icon not found or invalid at path: ${iconPath}`);
+    return;
+  }
+
   tray = new Tray(icon);
   tray.setToolTip('Antigravity Manager');
 
@@ -157,4 +176,16 @@ export function updateTrayMenu(account: CloudAccount | null, language?: string) 
 
 export function setTrayLanguage(lang: string) {
   updateTrayMenu(lastAccount, lang);
+}
+
+export function destroyTray() {
+  if (tray) {
+    try {
+      tray.destroy();
+    } catch (e) {
+      logger.error('Failed to destroy tray', e);
+    }
+    tray = null;
+    logger.info('Tray destroyed');
+  }
 }
