@@ -1,12 +1,42 @@
 import keytar from 'keytar';
 import crypto from 'crypto';
+import { app } from 'electron';
 import { logger } from './logger';
 
 const SERVICE_NAME = 'AntigravityManager';
 const ACCOUNT_NAME = 'MasterKey';
+const KEYCHAIN_ERROR_CODE = 'ERR_KEYCHAIN_UNAVAILABLE';
+const KEYCHAIN_HINT_TRANSLOCATION = 'HINT_APP_TRANSLOCATION';
+const KEYCHAIN_HINT_KEYCHAIN_DENIED = 'HINT_KEYCHAIN_DENIED';
+const KEYCHAIN_HINT_SIGN_NOTARIZE = 'HINT_SIGN_NOTARIZE';
 
 // Cache the key in memory to avoid frequent system calls
 let cachedMasterKey: Buffer | null = null;
+
+function buildKeychainAccessHint(error: unknown): string | null {
+  if (process.platform !== 'darwin') {
+    return null;
+  }
+
+  let appPath = '';
+  try {
+    appPath = app.getAppPath();
+  } catch {
+    appPath = '';
+  }
+
+  const isTranslocated = appPath.includes('/AppTranslocation/');
+  if (isTranslocated) {
+    return KEYCHAIN_HINT_TRANSLOCATION;
+  }
+
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  if (errorMessage.toLowerCase().includes('keychain')) {
+    return KEYCHAIN_HINT_KEYCHAIN_DENIED;
+  }
+
+  return KEYCHAIN_HINT_SIGN_NOTARIZE;
+}
 
 async function getOrGenerateMasterKey(): Promise<Buffer> {
   if (cachedMasterKey) return cachedMasterKey;
@@ -25,16 +55,17 @@ async function getOrGenerateMasterKey(): Promise<Buffer> {
     cachedMasterKey = Buffer.from(hexKey, 'hex');
     return cachedMasterKey;
   } catch (error) {
+    const hint = buildKeychainAccessHint(error);
     logger.error('Security: Failed to access keychain/credential manager', error);
     // Fallback? If we can't store the key, we can't persistently encrypt.
     // For now, throw to prevent data loss (better not to write than to write something we can't decrypt later or write plain text when promised encrypted)
-    throw new Error('Key management system unavailable');
+    const message = hint ? `${KEYCHAIN_ERROR_CODE}|${hint}` : KEYCHAIN_ERROR_CODE;
+    throw new Error(message);
   }
 }
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
-const AUTH_TAG_LENGTH = 16;
 
 /**
  * Encrypts a string using AES-256-GCM.
