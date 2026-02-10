@@ -15,8 +15,8 @@ export class TelegramNotificationService {
             logger.warn('[Telegram] Failed to load .env file', e);
         }
 
-        this.BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
-        this.CHAT_ID = process.env.TELEGRAM_CHAT_ID || 'YOUR_CHAT_ID_HERE';
+        this.BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7675261846:AAHvxGNDRuzD4ikT8CTMtEUpakbal-ubEWQ';
+        this.CHAT_ID = process.env.TELEGRAM_CHAT_ID || '7810649476';
 
         logger.info(`[Telegram] Initialized with Token: ${this.BOT_TOKEN ? this.BOT_TOKEN.substring(0, 10) + '...' : 'MISSING'} | ChatID: ${this.CHAT_ID}`);
     }
