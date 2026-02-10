@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import path from 'path';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import swc from 'unplugin-swc';
 
 // https://vitejs.dev/config
 export default defineConfig(({ mode }) => {
@@ -8,6 +9,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      swc.vite(),
       sentryVitePlugin({
         org: process.env.SENTRY_ORG || env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT || env.SENTRY_PROJECT,

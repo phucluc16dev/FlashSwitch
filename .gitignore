@@ -105,3 +105,14 @@ out/
 
 # Sentry Config File
 .env.sentry-build-plugin
+.vercel
+
+# Local development files
+.env.local
+.env.*.local
+*.db
+scripts/test-telegram.js
+temp_antigravity_kit/
+vite.main.config.mts.timestamp-*
+orpc_packets.log
+supabase/

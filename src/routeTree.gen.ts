@@ -9,10 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SkillAgentRouteImport } from './routes/skill-agent'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProxyRouteImport } from './routes/proxy'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as InfoRouteImport } from './routes/info'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SkillAgentRoute = SkillAgentRouteImport.update({
+  id: '/skill-agent',
+  path: '/skill-agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -23,6 +31,16 @@ const ProxyRoute = ProxyRouteImport.update({
   path: '/proxy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InfoRoute = InfoRouteImport.update({
+  id: '/info',
+  path: '/info',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,36 +49,62 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/info': typeof InfoRoute
+  '/mcp': typeof McpRoute
   '/proxy': typeof ProxyRoute
   '/settings': typeof SettingsRoute
+  '/skill-agent': typeof SkillAgentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/info': typeof InfoRoute
+  '/mcp': typeof McpRoute
   '/proxy': typeof ProxyRoute
   '/settings': typeof SettingsRoute
+  '/skill-agent': typeof SkillAgentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/info': typeof InfoRoute
+  '/mcp': typeof McpRoute
   '/proxy': typeof ProxyRoute
   '/settings': typeof SettingsRoute
+  '/skill-agent': typeof SkillAgentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/proxy' | '/settings'
+  fullPaths: '/' | '/info' | '/mcp' | '/proxy' | '/settings' | '/skill-agent'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/proxy' | '/settings'
-  id: '__root__' | '/' | '/proxy' | '/settings'
+  to: '/' | '/info' | '/mcp' | '/proxy' | '/settings' | '/skill-agent'
+  id:
+    | '__root__'
+    | '/'
+    | '/info'
+    | '/mcp'
+    | '/proxy'
+    | '/settings'
+    | '/skill-agent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  InfoRoute: typeof InfoRoute
+  McpRoute: typeof McpRoute
   ProxyRoute: typeof ProxyRoute
   SettingsRoute: typeof SettingsRoute
+  SkillAgentRoute: typeof SkillAgentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/skill-agent': {
+      id: '/skill-agent'
+      path: '/skill-agent'
+      fullPath: '/skill-agent'
+      preLoaderRoute: typeof SkillAgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -75,6 +119,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProxyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/info': {
+      id: '/info'
+      path: '/info'
+      fullPath: '/info'
+      preLoaderRoute: typeof InfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,8 +145,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  InfoRoute: InfoRoute,
+  McpRoute: McpRoute,
   ProxyRoute: ProxyRoute,
   SettingsRoute: SettingsRoute,
+  SkillAgentRoute: SkillAgentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

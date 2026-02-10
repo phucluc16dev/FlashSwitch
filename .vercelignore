@@ -1,0 +1,12 @@
+node_modules
+.vite
+out
+dist
+plugin
+scripts
+src
+supabase
+.git
+.gemini
+local_db
+test

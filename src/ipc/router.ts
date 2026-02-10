@@ -6,11 +6,13 @@ import { accountRouter } from './account/router';
 import { cloudRouter } from './cloud/router';
 import { configRouter } from './config/router';
 import { gatewayRouter } from './gateway/router';
+import { mcpRouter } from './mcp/router';
 
 import { os } from '@orpc/server';
 import { z } from 'zod';
 import { isProcessRunning, closeAntigravity, startAntigravity } from './process/handler';
 import { systemHandler } from './system/handler';
+import { skillHandler } from './skill/handler';
 
 // Log middleware setup
 const logMiddleware = os.middleware(async (opts: any) => {
@@ -53,4 +55,6 @@ export const router = os.use(logMiddleware).router({
   config: configRouter,
   gateway: gatewayRouter,
   system: systemHandler,
+  skill: skillHandler,
+  mcp: mcpRouter,
 });

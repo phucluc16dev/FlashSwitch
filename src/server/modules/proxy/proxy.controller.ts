@@ -2,13 +2,13 @@ import { Controller, Get, Post, Body, Res, HttpStatus, UseGuards, Inject } from 
 import { FastifyReply } from 'fastify';
 import { ProxyService } from './proxy.service';
 import { Observable } from 'rxjs';
-import { OpenAIChatRequest, AnthropicChatRequest } from './interfaces/request-interfaces';
+import type { OpenAIChatRequest, AnthropicChatRequest } from './interfaces/request-interfaces';
 import { ProxyGuard } from './proxy.guard';
 
 @Controller('v1')
 @UseGuards(ProxyGuard)
 export class ProxyController {
-  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) {}
+  constructor(@Inject(ProxyService) private readonly proxyService: ProxyService) { }
 
   @Get('models')
   getModels() {

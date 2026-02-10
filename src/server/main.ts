@@ -4,12 +4,38 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { AppModule } from './app.module';
 import { logger } from '../utils/logger';
 import { TokenManagerService } from './modules/proxy/token-manager.service';
+import { execSync } from 'child_process';
 
 import { ProxyConfig } from '../types/config';
 import { setServerConfig } from './server-config';
 
 let app: NestFastifyApplication | null = null;
 let currentPort: number = 0;
+
+function killProcessOnPort(port: number): void {
+  try {
+    const result = execSync(`netstat -ano | findstr :${port} | findstr LISTENING`, { encoding: 'utf-8' });
+    const lines = result.trim().split('\n');
+    const pids = new Set<string>();
+    for (const line of lines) {
+      const parts = line.trim().split(/\s+/);
+      const pid = parts[parts.length - 1];
+      if (pid && pid !== '0') {
+        pids.add(pid);
+      }
+    }
+    for (const pid of pids) {
+      try {
+        execSync(`taskkill /PID ${pid} /F`, { encoding: 'utf-8' });
+        logger.info(`[Server] Killed old process ${pid} on port ${port}`);
+      } catch {
+        // Process may already be dead
+      }
+    }
+  } catch {
+    // No process found on port — that's fine
+  }
+}
 
 export async function bootstrapNestServer(config: ProxyConfig): Promise<boolean> {
   const port = config.port || 8045;
@@ -19,6 +45,9 @@ export async function bootstrapNestServer(config: ProxyConfig): Promise<boolean>
   }
 
   setServerConfig(config);
+
+  // Kill any zombie process holding the port from a previous run
+  killProcessOnPort(port);
 
   try {
     app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {

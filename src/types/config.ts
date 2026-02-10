@@ -45,10 +45,10 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   privacy_consent_asked: false, // Whether the user has been asked for consent
   default_export_path: null,
   proxy: {
-    enabled: false,
+    enabled: true,
     port: 8045,
     api_key: '', // Generated dynamically if default needed
-    auto_start: false,
+    auto_start: true,
     anthropic_mapping: {},
     request_timeout: 120,
     upstream_proxy: {

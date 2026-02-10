@@ -1,4 +1,6 @@
+import 'dotenv/config'; // Load env vars
 import './instrument'; // MUST be the first import to ensure Sentry initializes before app ready
+
 import { app, BrowserWindow, dialog, shell } from 'electron';
 import type { MessageBoxOptions } from 'electron';
 import path from 'path';
@@ -386,14 +388,27 @@ app
       AuthServer.start();
 
       // Gateway Server (NestJS) - auto-start if enabled
+      // Gateway Server (NestJS)
       const config = startupConfig || ConfigManager.loadConfig();
-      if (config.proxy?.auto_start) {
+      // Ensure server starts for Payment Module availability
+      if (true) {
         const port = config.proxy?.port || 8045;
         // Default to a valid ProxyConfig object if null, although loadConfig ensures defaults
         if (config.proxy) {
           await bootstrapNestServer(config.proxy);
+        } else {
+          // Fallback if proxy config is missing entirely
+          await bootstrapNestServer({
+            enabled: true,
+            port: 8045,
+            api_key: '',
+            auto_start: true,
+            anthropic_mapping: {},
+            request_timeout: 120,
+            upstream_proxy: { enabled: false, url: '' }
+          });
         }
-        logger.info(`NestJS Proxy: Auto-started on port ${port}`);
+        logger.info(`NestJS Proxy Server (Payment Module): Auto-started on port ${port}`);
       }
 
       const enabled = CloudAccountRepo.getSetting('auto_switch_enabled', false);

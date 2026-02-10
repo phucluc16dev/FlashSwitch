@@ -11,6 +11,7 @@ import {
   startAuthFlow,
 } from '@/hooks/useCloudAccounts';
 import { CloudAccountCard } from '@/components/CloudAccountCard';
+import { GoogleProPurchaseDialog } from '@/components/accounting/GoogleProPurchaseDialog';
 import { CloudAccount } from '@/types/cloudAccount';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -26,6 +27,7 @@ import {
   Trash2,
   X,
   RefreshCw,
+  CreditCard,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -345,6 +347,13 @@ export function CloudAccountList() {
             />
             {t('cloud.syncFromIDE')}
           </Button>
+
+          <GoogleProPurchaseDialog>
+            <Button variant="default" className="bg-amber-600 hover:bg-amber-700">
+              <CreditCard className="mr-2 h-4 w-4" />
+              Buy Google Pro
+            </Button>
+          </GoogleProPurchaseDialog>
 
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
