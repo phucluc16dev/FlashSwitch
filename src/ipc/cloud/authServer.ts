@@ -1,4 +1,5 @@
 import http from 'http';
+import { execSync } from 'child_process';
 import { logger } from '../../utils/logger';
 import { ipcContext } from '../context';
 
@@ -6,11 +7,39 @@ export class AuthServer {
   private static server: http.Server | null = null;
   private static PORT = 8888;
 
+  private static killProcessOnPort(port: number): void {
+    try {
+      const result = execSync(`netstat -ano | findstr :${port} | findstr LISTENING`, { encoding: 'utf-8' });
+      const lines = result.trim().split('\n');
+      const pids = new Set<string>();
+      for (const line of lines) {
+        const parts = line.trim().split(/\s+/);
+        const pid = parts[parts.length - 1];
+        if (pid && pid !== '0' && pid !== String(process.pid)) {
+          pids.add(pid);
+        }
+      }
+      for (const pid of pids) {
+        try {
+          execSync(`taskkill /PID ${pid} /F`, { encoding: 'utf-8' });
+          logger.info(`[AuthServer] Killed old process ${pid} on port ${port}`);
+        } catch {
+          // Process may already be dead
+        }
+      }
+    } catch {
+      // No process found — that's fine
+    }
+  }
+
   static start() {
     if (this.server) {
       logger.warn('AuthServer: Server already running');
       return;
     }
+
+    // Kill any zombie process holding the port
+    this.killProcessOnPort(this.PORT);
 
     this.server = http.createServer((req, res) => {
       const url = new URL(req.url || '', `http://localhost:${this.PORT}`);
